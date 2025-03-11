@@ -214,7 +214,7 @@ AUTHENTICATION_BACKENDS = [
 # rest_framework config
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "apps.users.authentication.CustomJWTAuthentication",
+        "apps.users.cookie_auth.CookieAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
@@ -305,7 +305,7 @@ sentry_sdk.init(
 # Plaid
 PLAID_ENV = getenv("PLAID_ENV", "sandbox")
 PLAID_PRODUCTS = getenv("PLAID_PRODUCTS", "auth")
-PLAID_COUNTRY_CODES = getenv("PLAID_COUNTRY_CODES", "US")
+PLAID_COUNTRY_CODES = getenv("PLAID_COUNTRY_CODES", "DE")
 PLAID_CLIENT_ID = getenv("PLAID_CLIENT_ID")
 PLAID_SECRET = getenv("PLAID_SECRET")
 

@@ -16,8 +16,8 @@ class CookieAuthentication(JWTAuthentication):
 
         if header is not None:
             raw_token = self.get_raw_token(header)
-        elif settings.COOKIE_NAME in request.COOKIES:
-            raw_token = request.COOKIES.get(settings.COOKIE_NAME)
+        elif settings.AUTH_COOKIE in request.COOKIES:
+            raw_token = request.COOKIES.get(settings.AUTH_COOKIE)
 
         if raw_token is not None:
             try:
