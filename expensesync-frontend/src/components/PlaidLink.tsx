@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button } from './ui/button'
-import { PlaidLinkOnSuccess, PlaidLinkOptions, usePlaidLink } from 'react-plaid-link'
+import { PlaidLinkOnSuccess, PlaidLinkOnSuccessMetadata, PlaidLinkOptions, usePlaidLink } from 'react-plaid-link'
 import { useRouter } from 'next/navigation';
 
 // import { exchangePublicToken } from '@/lib/actions/user.actions';
 import Image from 'next/image';
 import { PlaidLinkProps } from '@/types';
 import { useCreatePlaidLinkTokenMutation, useExchangePublicTokenMutation } from '@/lib/redux/features/account/bankAccountApiSlice';
+import { toast } from 'sonner';
+import extractErrorMessage from '@/utils/extractErrorMessage';
 
 const PlaidLink = ({variant}: PlaidLinkProps) => {
   const router = useRouter();
@@ -20,15 +22,27 @@ const PlaidLink = ({variant}: PlaidLinkProps) => {
       setToken(data?.link_token);
     }
     getLinkToken();
-  }, [createPlaidLinkToken]);
+  }, []);
 
 
-  const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string) => {
+  const onSuccess = useCallback<PlaidLinkOnSuccess>(async (public_token: string, metadata: PlaidLinkOnSuccessMetadata) => {
     // send public_token to server
-    await exchangePublicToken({
-      public_token: public_token,
-    }).unwrap()
-    router.push('/');
+    try {
+      await exchangePublicToken({
+        public_token: public_token,
+        metadata: {
+          institution: {
+            name: metadata.institution?.name || '',
+            institution_id: metadata.institution?.institution_id || ''
+          }
+        }
+      }).unwrap()
+      toast.success("Account successfully linked.")
+      router.push('/');
+    } catch (error) {
+      const errorMessage=extractErrorMessage(error) 
+      toast.error(errorMessage)
+    }
   }, [])
   
   const config: PlaidLinkOptions = {

@@ -58,20 +58,21 @@ class ExchangePublicTokenView(APIView):
 
     def post(self, request):
         try:
+            
             public_token = request.data.get("public_token")
-            institution_id = request.data.get("institution_id")
-            institution_name = request.POST.get('institution_name')
+            metadata = request.data.get("metadata")
+            institution_id = metadata.get("institution", {}).get("institution_id", "")
+            institution_name = metadata.get("institution", {}).get("name", "")
 
             bank_account = BankAccount.objects.filter(user=request.user)
-            if bank_account.filter(id=institution_id).exists():
+            if bank_account.filter(institution_id=institution_id).exists():
                 return Response({
                     "detail": "You already linked this institution!"
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             # Échanger le public_token contre un access_token avec Plaid
             exchange_request = ItemPublicTokenExchangeRequest(public_token)
-            exchange_response = plaid_config.client.item_public_token_exchange(
-                exchange_request)
+            exchange_response = plaid_config.client.item_public_token_exchange(exchange_request)
 
             access_token = exchange_response['access_token']
             item_id = exchange_response['item_id']

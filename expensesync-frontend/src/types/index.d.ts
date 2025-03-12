@@ -389,6 +389,10 @@ export interface ExchangePublicTokenResponse {
 
 export interface ExchangeData {
   public_token: string;
-  // institution_id: string;
-  // institution_name: string;
+  metadata: {
+    institution: {
+      name: string | "";
+      institution_id: string | "";
+    };
+  };
 }

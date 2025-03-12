@@ -17,11 +17,6 @@ import { setAuth } from "@/lib/redux/features/auth/authSlice";
 import PlaidLink from "@/components/PlaidLink";
 
 
-// interface FormValues {
-//   email: string;
-//   password: string;
-// }
-
 const LoginForm = () => {
   // const isAuthenticated = useAppSelector((state: { auth: { isAuthenticated: boolean } }) => state.auth.isAuthenticated);
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
