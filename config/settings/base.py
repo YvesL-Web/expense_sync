@@ -293,14 +293,14 @@ CACHES = {
 
 
 # Sentry config 
-sentry_sdk.init(
-    dsn=getenv("SENTRY_DNS"),
-    integrations=[DjangoIntegration(),],
-    traces_sample_rate=1.0,  #Enables performance monitoring
-    # Add data like request headers and IP for users,
-    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
-    send_default_pii=True, # Sends Personally Identifiable Information (PII), like user details
-)
+# sentry_sdk.init(
+#     dsn=getenv("SENTRY_DNS"),
+#     integrations=[DjangoIntegration(),],
+#     traces_sample_rate=1.0,  #Enables performance monitoring
+#     # Add data like request headers and IP for users,
+#     # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+#     send_default_pii=True, # Sends Personally Identifiable Information (PII), like user details
+# )
 
 # Plaid
 PLAID_ENV = getenv("PLAID_ENV", "sandbox")

@@ -8,10 +8,16 @@ from plaid.model.item_public_token_exchange_request import (
     ItemPublicTokenExchangeRequest,)
 from plaid.model.link_token_create_request import LinkTokenCreateRequest
 from plaid.model.link_token_create_request_user import LinkTokenCreateRequestUser
+from plaid.model.accounts_get_request import AccountsGetRequest
+from plaid.model.institutions_get_by_id_request import InstitutionsGetByIdRequest
+from plaid.model.transactions_get_request import TransactionsGetRequest
+from plaid.model.transactions_sync_request import TransactionsSyncRequest
+
+from apps.bank_accounts.serializers import BankAccountSerializer
 
 
 from .utils.plaid_config import plaid_config
-from .models import BankAccount
+from .models import BankAccount, SyncCursor, Transaction
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +26,9 @@ class GetAllBankAccounts(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        return Response("Nothing for th moment...coming soon.",status=status.HTTP_200_OK)
+        user = request.user
+        user_banksAccount = BankAccount.objects.filter(user=user)
+        return Response(BankAccountSerializer(user_banksAccount, many=True).data, status=status.HTTP_200_OK)
 
 
 class CreatePlaidLinkToken(APIView):
@@ -58,10 +66,11 @@ class ExchangePublicTokenView(APIView):
 
     def post(self, request):
         try:
-            
+
             public_token = request.data.get("public_token")
             metadata = request.data.get("metadata")
-            institution_id = metadata.get("institution", {}).get("institution_id", "")
+            institution_id = metadata.get(
+                "institution", {}).get("institution_id", "")
             institution_name = metadata.get("institution", {}).get("name", "")
 
             bank_account = BankAccount.objects.filter(user=request.user)
@@ -72,7 +81,8 @@ class ExchangePublicTokenView(APIView):
 
             # Échanger le public_token contre un access_token avec Plaid
             exchange_request = ItemPublicTokenExchangeRequest(public_token)
-            exchange_response = plaid_config.client.item_public_token_exchange(exchange_request)
+            exchange_response = plaid_config.client.item_public_token_exchange(
+                exchange_request)
 
             access_token = exchange_response['access_token']
             item_id = exchange_response['item_id']
@@ -96,3 +106,175 @@ class ExchangePublicTokenView(APIView):
             return Response({
                 "detail": "Something went wrong while integrating your bank account."
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# class GetAccountView(APIView):
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def get(self, request, account_id):
+#         try:
+#             # Récupérer la banque depuis la base de données
+#             bank_account = BankAccount.objects.get(
+#                 id=account_id, user=request.user)
+#             # Récupérer les informations du compte depuis Plaid
+#             account_request = AccountsGetRequest(
+#                 access_token=bank_account.access_token, )
+#             account_response = plaid_config.client.accounts_get(
+#                 account_request)
+
+#             # Récupérer les transactions depuis Plaid
+#             transactions_request = TransactionsSyncRequest(access_token=bank_account.access_token)
+#             transactions_response = plaid_config.client
+
+
+class GetAccountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, account_id):
+        try:
+            # Récupérer la banque depuis la base de données
+            bank_account = BankAccount.objects.get(
+                id=account_id, user=request.user)
+            # Récupérer les informations du compte depuis Plaid
+            account_request = AccountsGetRequest(
+                access_token=bank_account.access_token, )
+            account_response = plaid_config.client.accounts_get(
+                account_request)
+
+            # Récupérer les transactions depuis Plaid
+            transactions_request = TransactionsSyncRequest(
+                access_token=bank_account.access_token)
+            transactions_response = plaid_config.client.transactions_sync(
+                transactions_request)
+
+            # Construire l'objet compte
+            # account = {
+            #     'account_id': account_response['account_id'],
+            #     'available_balance': account_response['balances']['available'],
+            #     'current_balance': account_response['balances']['current'],
+            #     'institution_id': bank_account.institution_id,
+            #     'name': account_response['name'],
+            #     'official_name': account_response['official_name'],
+            #     'mask': account_response['mask'],
+            #     'type': account_response['type'],
+            #     'subtype': account_response['subtype'],
+            #     'bank_account_id': bank_account.id,
+            # }
+
+            # Fusionner et trier les transactions
+            # all_transactions = list(transfer_transactions) + transactions
+            # all_transactions.sort(key=lambda x: x['date'], reverse=True)
+
+            return Response({
+                "data": account_response.to_dict().get("accounts"),
+                "transactions": transactions_response.to_dict()
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(
+                f"Something went wrong in GetAccountView for user {self.request.user} -> {str(e)}")
+            return Response([], status=status.HTTP_404_NOT_FOUND)
+
+
+class GetTransactionsView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, account_id):
+        try:
+            # Récupérer le cursor depuis la base de données
+            bank = BankAccount.objects.get(id=account_id, user=request.user)
+            sync_cursor, created = SyncCursor.objects.get_or_create(bank=bank)
+            cursor = sync_cursor.cursor
+
+            # Variables pour stocker les transactions synchronisées
+            added = []
+            modified = []
+            removed = []
+            has_more = True
+
+            # Synchroniser les transactions
+            while has_more:
+                transaction_request = TransactionsSyncRequest(
+                    access_token=bank.access_token,
+                    cursor=cursor if cursor else "",
+                )
+                transaction_response = plaid_config.client.transactions_sync(
+                    transaction_request)
+
+                # Ajouter les transactions synchronisées
+                added.extend(transaction_response["added"])
+                modified.extend(transaction_response["modified"])
+                removed.extend(transaction_response["removed"])
+
+                # Mettre à jour le curseur
+                cursor = transaction_response["next_cursor"]
+                has_more = transaction_response["has_more"]
+            
+            # fonction pour appliquer les mises à jour dans la base de données
+            self.apply_updates(bank, added, modified, removed, cursor)
+           
+            # Formater les transactions pour la réponse
+            formatted_transactions = [{
+                'id': t['transaction_id'],
+                'name': t['name'],
+                'payment_channel': t['payment_channel'],
+                'type': t['payment_channel'],
+                'account_id': t['account_id'],
+                'amount': t['amount'],
+                'pending': t['pending'],
+                'category': t['category'][0] if t['category'] else '',
+                'date': t['date'],
+                'image': t['logo_url'],
+            } for t in added]
+
+            return Response({
+                "added": formatted_transactions,
+                "modified": modified,
+                "removed": removed,
+                "cursor": cursor,
+            }, status=status.HTTP_200_OK)
+
+        except BankAccount.DoesNotExist:
+            logger.error(
+                f"Something went wrong in GetTransactionsView for user {self.request.user} -> {str(e)}")
+            return Response({'detail': 'Bank not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(
+                f"Something went wrong in GetTransactionsView for user {self.request.user} -> {str(e)}")
+            return Response([], status=status.HTTP_404_NOT_FOUND)
+
+    def apply_updates(self, bank, added, modified, removed, cursor) -> None:
+        # Appliquer les transactions ajoutées
+        for transaction in added:
+            Transaction.objects.update_or_create(
+                transaction_id=transaction['transaction_id'],
+                defaults={
+                    'bank': bank,
+                    'name': transaction['name'],
+                    'amount': transaction['amount'],
+                    'date': transaction['date'],
+                    'pending': transaction['pending'],
+                    'category': transaction['category'][0] if transaction['category'] else '',
+                    'payment_channel': transaction['payment_channel'],
+                }
+            )
+
+        # Appliquer les transactions modifiées
+        for transaction in modified:
+            Transaction.objects.filter(transaction_id=transaction['transaction_id']).update(
+                name=transaction['name'],
+                amount=transaction['amount'],
+                date=transaction['date'],
+                pending=transaction['pending'],
+                category=transaction['category'][0] if transaction['category'] else '',
+                payment_channel=transaction['payment_channel'],
+            )
+
+        # Supprimer les transactions supprimées
+        Transaction.objects.filter(transaction_id__in=removed).delete()
+        # for transaction in removed:
+        #     Transaction.objects.filter(transaction_id=transaction['transaction_id']).delete()
+
+        # Mettre à jour le curseur
+        SyncCursor.objects.filter(bank=bank).update(cursor=cursor)
+        # SyncCursor.objects.update(bank=bank, cursor=cursor)
+        

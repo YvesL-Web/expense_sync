@@ -396,3 +396,15 @@ export interface ExchangeData {
     };
   };
 }
+
+export interface BankAccount {
+  id: string
+  institution_name?: string
+  institution_id?: string
+}
+
+export interface BankAccountResponse {
+  [
+
+  ]
+}

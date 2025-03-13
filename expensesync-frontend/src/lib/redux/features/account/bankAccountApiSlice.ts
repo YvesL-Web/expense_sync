@@ -2,11 +2,19 @@ import { apiSlice } from "../../services/apiSlice";
 import {
   ExchangePublicTokenResponse,
   PlaidLinkTokenResponse,
-  ExchangeData
+  ExchangeData,
+  BankAccountResponse,
 } from "@/types";
 
 export const bankAccountApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    getBankAccount: builder.query<BankAccountResponse,void>({
+      query: () => ({
+        url: "/bank/",
+        method: "GET",
+      }),
+      providesTags:["Account"]
+    }),
     createPlaidLinkToken: builder.mutation<PlaidLinkTokenResponse, void>({
       query: () => ({
         url: "/bank/create-link-token/",
@@ -25,5 +33,5 @@ export const bankAccountApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {useCreatePlaidLinkTokenMutation, useExchangePublicTokenMutation} = bankAccountApiSlice
+export const {useCreatePlaidLinkTokenMutation, useExchangePublicTokenMutation, } = bankAccountApiSlice
 
