@@ -1,0 +1,32 @@
+[
+  {
+    "account_id": "QyodLKnDbdhBAA71KbzqUy9QaVNQLnIw5Nq1n",
+    "balances": {
+      "available": 100.0,
+      "current": 110.0,
+      "iso_currency_code": "EUR",
+      "limit": null,
+      "unofficial_currency_code": null
+    },
+    "mask": "0000",
+    "name": "Plaid Current Account",
+    "official_name": "Plaid Standard Current Account",
+    "subtype": "checking",
+    "type": "depository"
+  },
+  {
+    "account_id": "ZRVZnN3WlZTlAAz58rL4tZRyxa9yQAie6od3w",
+    "balances": {
+      "available": 200.0,
+      "current": 210.0,
+      "iso_currency_code": "EUR",
+      "limit": null,
+      "unofficial_currency_code": null
+    },
+    "mask": "1111",
+    "name": "Plaid Saving",
+    "official_name": "Plaid Standard Interest Saving",
+    "subtype": "savings",
+    "type": "depository"
+  }
+]
