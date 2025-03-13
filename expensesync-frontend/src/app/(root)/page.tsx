@@ -3,14 +3,19 @@
 import HeaderBox from "@/components/HeaderBox";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
+import { useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
 import { useGetUserQuery } from "@/lib/redux/features/auth/authApiSlice";
 import { User } from "@/types";
 
 const Page = () => {
   const {data, isLoading} = useGetUserQuery() 
+  const {data: bankAccounts} = useGetBankAccountsQuery()
+
   if (isLoading) {
     return null;
   }
+  if (!bankAccounts) return null
+
   return (
     <section className="home">
       <div className="home-content">
@@ -22,9 +27,9 @@ const Page = () => {
             subtext="Access and manage your account and transactions efficiently."
           />
           <TotalBalanceBox
-            accounts={[]}
-            totalBanks={1}
-            totalCurrentBalance={5000.5}
+            accounts={bankAccounts.accounts}
+            totalBanks={bankAccounts.total_banks}
+            totalCurrentBalance={bankAccounts.total_current_balance}
           />
         </header>
         {/* Recent Transactions */}
@@ -34,7 +39,7 @@ const Page = () => {
         // transactions={account?.transactions}
         // banks={accountsData?.slice(0, 2)}
         transactions={[]}
-        banks={[]}
+        banks={bankAccounts.accounts}
       />
     </section>
   );

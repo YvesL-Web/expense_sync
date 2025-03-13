@@ -139,7 +139,7 @@ declare type NewDwollaCustomerParams = {
 };
 
 declare interface CreditCardProps {
-  account: Account;
+  account: BankAccount;
   userName: string;
   showBalance?: boolean;
 }
@@ -218,7 +218,7 @@ declare interface FooterProps {
 declare interface RightSidebarProps {
   user: User;
   transactions: Transaction[];
-  banks: Bank[] & Account[];
+  banks: BankAccount[];
 }
 
 declare interface SiderbarProps {
@@ -398,13 +398,20 @@ export interface ExchangeData {
 }
 
 export interface BankAccount {
-  id: string
-  institution_name?: string
-  institution_id?: string
+  account_id: string
+  available_balance: number
+  current_balance: number
+  official_name: string
+  mask: string
+  institution_id: string
+  name: string
+  type: string
+  subtype: string
+  bank_account_id:string
 }
 
 export interface BankAccountResponse {
-  [
-
-  ]
+  accounts: BankAccount[]
+  total_banks: number
+  total_current_balance: number
 }

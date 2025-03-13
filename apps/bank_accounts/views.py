@@ -153,7 +153,7 @@ class GetAccountsView(APIView):
             # Construct response
             response_data = {
                 "accounts": accounts,
-                "total_banks": len(accounts),
+                "total_banks": len(bank_accounts),
                 "total_current_balance": total_current_balance,
             }
             return Response(response_data, status=status.HTTP_200_OK)

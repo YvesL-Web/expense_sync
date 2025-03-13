@@ -8,9 +8,9 @@ import {
 
 export const bankAccountApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    getBankAccount: builder.query<BankAccountResponse,void>({
+    getBankAccounts: builder.query<BankAccountResponse,void>({
       query: () => ({
-        url: "/bank/",
+        url: "/bank/get_accounts/",
         method: "GET",
       }),
       providesTags:["Account"]
@@ -33,5 +33,5 @@ export const bankAccountApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const {useCreatePlaidLinkTokenMutation, useExchangePublicTokenMutation, } = bankAccountApiSlice
+export const {useCreatePlaidLinkTokenMutation, useExchangePublicTokenMutation, useGetBankAccountsQuery } = bankAccountApiSlice
 
