@@ -205,7 +205,7 @@ declare interface BankTabItemProps {
 }
 
 declare interface TotalBalanceBoxProps {
-  accounts: Account[];
+  accounts: BankAccount[];
   totalBanks: number;
   totalCurrentBalance: number;
 }
@@ -250,7 +250,7 @@ declare interface CategoryProps {
 }
 
 declare interface DoughnutChartProps {
-  accounts: Account[];
+  accounts: BankAccount[];
 }
 
 declare interface PaymentTransferFormProps {
@@ -398,20 +398,14 @@ export interface ExchangeData {
 }
 
 export interface BankAccount {
-  account_id: string
-  available_balance: number
-  current_balance: number
-  official_name: string
-  mask: string
-  institution_id: string
-  name: string
-  type: string
-  subtype: string
-  bank_account_id:string
+  bank_account_id: string;
+  institution_id: string;
+  available_balance: number;
+  institution_name: string;
 }
 
 export interface BankAccountResponse {
-  accounts: BankAccount[]
-  total_banks: number
-  total_current_balance: number
+  accounts: BankAccount[];
+  total_banks: number;
+  total_current_balance: number;
 }

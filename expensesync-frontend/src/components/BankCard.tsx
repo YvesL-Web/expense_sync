@@ -10,14 +10,14 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
 
   return (
     <div className="flex flex-col">
-      <Link href={`/transaction-history/?id=${account.account_id}`} className="bank-card">
+      <Link href={`/transaction-history/?id=${account.bank_account_id}`} className="bank-card">
         <div className="bank-card_content">
           <div>
             <h1 className="text-16 font-semibold text-white">
-              {account.name}
+              {account.institution_name}
             </h1>
             <p className="font-ibm-plex-serif font-black text-white">
-              {formatAmount(account.current_balance)}
+              {formatAmount(account.available_balance)}
             </p>
           </div>
 
@@ -31,7 +31,7 @@ const BankCard = ({ account, userName, showBalance = true }: CreditCardProps) =>
               </h2>
             </div>
             <p className="text-14 font-semibold tracking-[1.1px] text-white">
-              ●●●● ●●●● ●●●● <span className="text-16">{account?.mask}</span>
+              ●●●● ●●●● ●●●● <span className="text-16"></span>
             </p>
           </article>
         </div>

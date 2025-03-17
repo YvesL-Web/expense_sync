@@ -1,6 +1,7 @@
 "use client"
 
 import HeaderBox from "@/components/HeaderBox";
+import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
 import { useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
@@ -28,11 +29,12 @@ const Page = () => {
           />
           <TotalBalanceBox
             accounts={bankAccounts.accounts}
-            totalBanks={bankAccounts.total_banks}
-            totalCurrentBalance={bankAccounts.total_current_balance}
+            total_banks={bankAccounts.total_banks}
+            total_current_balance={bankAccounts.total_current_balance}
           />
         </header>
         {/* Recent Transactions */}
+        <RecentTransactions  />
       </div>
       <RightSidebar 
         user={data || {} as User}

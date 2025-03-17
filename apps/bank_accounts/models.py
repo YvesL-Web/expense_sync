@@ -30,14 +30,17 @@ class BankAccount(TimeStampedModel):
 
 
 class Transaction(TimeStampedModel):
-    transaction_id = models.CharField(max_length=255, unique=True)
     bank = models.ForeignKey(BankAccount, on_delete=models.CASCADE, related_name='transactions')
+    transaction_id = models.CharField(max_length=255, null=True, blank=True)
+    account_id = models.CharField(max_length=255, null=True, blank=True)
     name = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
+    payment_channel = models.CharField(max_length=255)
     pending = models.BooleanField(default=False)
     category = models.CharField(max_length=255, blank=True, null=True)
     payment_channel = models.CharField(max_length=255)
+    image= models.CharField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.amount}"
