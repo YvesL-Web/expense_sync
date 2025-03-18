@@ -4,18 +4,30 @@ import HeaderBox from "@/components/HeaderBox";
 import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
-import { useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
+import { useGetAccountDetailsQuery, useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
 import { useGetUserQuery } from "@/lib/redux/features/auth/authApiSlice";
 import { User } from "@/types";
+import { string } from "zod";
 
-const Page = () => {
+interface SearchParamProps {
+	params: {
+		// account_id: string;
+    page: number | 1;
+	};
+}
+
+const Page = ({params: {page}}: SearchParamProps) => {
   const {data, isLoading} = useGetUserQuery() 
-  const {data: bankAccounts} = useGetBankAccountsQuery()
+  const {data: bankAccounts , isLoading: isBankaccountLoading} = useGetBankAccountsQuery()
+  const account_id = bankAccounts?.accounts[0].bank_account_id
+  const {data: accountDetails} = useGetAccountDetailsQuery(account_id)
 
-  if (isLoading) {
+
+  if (isLoading && isBankaccountLoading) {
     return null;
   }
-  if (!bankAccounts) return null
+  if (!accountDetails) return null
+  
 
   return (
     <section className="home">
@@ -34,7 +46,7 @@ const Page = () => {
           />
         </header>
         {/* Recent Transactions */}
-        <RecentTransactions  />
+        <RecentTransactions accounts= {accountDetails} page={page} />
       </div>
       <RightSidebar 
         user={data || {} as User}

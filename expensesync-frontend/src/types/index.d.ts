@@ -64,24 +64,24 @@ declare type Account = {
   shareableId: string;
 };
 
-declare type Transaction = {
-  id: string;
-  $id: string;
-  name: string;
-  paymentChannel: string;
-  type: string;
-  accountId: string;
-  amount: number;
-  pending: boolean;
-  category: string;
-  date: string;
-  image: string;
-  type: string;
-  $createdAt: string;
-  channel: string;
-  senderBankId: string;
-  receiverBankId: string;
-};
+// declare type Transaction = {
+//   id: string;
+//   $id: string;
+//   name: string;
+//   paymentChannel: string;
+//   type: string;
+//   accountId: string;
+//   amount: number;
+//   pending: boolean;
+//   category: string;
+//   date: string;
+//   image: string;
+//   type: string;
+//   $createdAt: string;
+//   channel: string;
+//   senderBankId: string;
+//   receiverBankId: string;
+// };
 
 declare type Bank = {
   $id: string;
@@ -225,12 +225,12 @@ declare interface SiderbarProps {
   user: User;
 }
 
-declare interface RecentTransactionsProps {
-  accounts: Account[];
-  transactions: Transaction[];
-  appwriteItemId: string;
-  page: number;
-}
+// declare interface RecentTransactionsProps {
+//   accounts: Account[];
+//   transactions: Transaction[];
+//   appwriteItemId: string;
+//   page: number;
+// }
 
 declare interface TransactionHistoryTableProps {
   transactions: Transaction[];
@@ -408,4 +408,35 @@ export interface BankAccountResponse {
   accounts: BankAccount[];
   total_banks: number;
   total_current_balance: number;
+}
+
+export interface Transaction {
+  transaction_id: string;
+  account_id: string;
+  name: string;
+  amount: number;
+  date: string;
+  payment_channel: string;
+  pending: boolean;
+  category: string;
+  image: string;
+}
+
+export interface AcccountDetailsResponse {
+  data: [
+    {
+      account_id: string;
+      institution_id: string;
+      name: string;
+      official_name: string;
+      type: string;
+      subtype: string;
+      transactions: Transaction[];
+    }
+  ];
+}
+
+declare interface RecentTransactionsProps {
+  accounts: AcccountDetailsResponse;
+  page: number;
 }
