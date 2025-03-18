@@ -1,33 +1,32 @@
-"use client"
+"use client";
 
 import HeaderBox from "@/components/HeaderBox";
-import RecentTransactions from "@/components/RecentTransactions";
 import RightSidebar from "@/components/RightSidebar";
 import TotalBalanceBox from "@/components/TotalBalanceBox";
-import { useGetAccountDetailsQuery, useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
+import { useGetBankAccountsQuery } from "@/lib/redux/features/account/bankAccountApiSlice";
 import { useGetUserQuery } from "@/lib/redux/features/auth/authApiSlice";
 import { User } from "@/types";
-import { string } from "zod";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { BankTabItem } from "@/components/BankTabItem";
+import SubAccounts from "@/components/SubAccounts";
 
 interface SearchParamProps {
-	params: {
-		// account_id: string;
+  params: {
+    // account_id: string;
     page: number | 1;
-	};
+  };
 }
 
-const Page = ({params: {page}}: SearchParamProps) => {
-  const {data, isLoading} = useGetUserQuery() 
-  const {data: bankAccounts , isLoading: isBankaccountLoading} = useGetBankAccountsQuery()
-  const account_id = bankAccounts?.accounts[0].bank_account_id
-  const {data: accountDetails} = useGetAccountDetailsQuery(account_id)
-
+const Page = ({ params: { page } }: SearchParamProps) => {
+  const { data, isLoading } = useGetUserQuery();
+  const { data: bankAccounts, isLoading: isBankaccountLoading } =
+    useGetBankAccountsQuery();
 
   if (isLoading && isBankaccountLoading) {
     return null;
   }
-  if (!accountDetails) return null
-  
+  if (!bankAccounts) return null;
 
   return (
     <section className="home">
@@ -45,11 +44,37 @@ const Page = ({params: {page}}: SearchParamProps) => {
             total_current_balance={bankAccounts.total_current_balance}
           />
         </header>
-        {/* Recent Transactions */}
-        <RecentTransactions accounts= {accountDetails} page={page} />
+        {/* Test tab */}
+        <section className="recent-transactions">
+          <header className="flex items-center justify-between">
+            <h2 className="recent-transactions-label">Recent transactions</h2>
+            <Link href={`/transaction-history/?id=`} className="view-all-btn">
+              View all
+            </Link>
+          </header>
+          <Tabs className="w-full">
+            <TabsList className="recent-transactions-tablist">
+              {bankAccounts.accounts.map((account) => (
+                <TabsTrigger
+                  key={account.bank_account_id}
+                  value={account.bank_account_id}>
+                  <BankTabItem
+                    account={account}
+                    account_id={account.bank_account_id}
+                  />
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {bankAccounts.accounts.map((account) => (
+              <TabsContent key={account.bank_account_id} value={account.bank_account_id}>
+                <SubAccounts bank_account_id={account.bank_account_id} />
+              </TabsContent>
+              ))}
+          </Tabs>
+        </section>
       </div>
-      <RightSidebar 
-        user={data || {} as User}
+      <RightSidebar
+        user={data || ({} as User)}
         // transactions={account?.transactions}
         // banks={accountsData?.slice(0, 2)}
         transactions={[]}

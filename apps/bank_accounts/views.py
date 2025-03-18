@@ -185,6 +185,7 @@ class GetAccountView(APIView):
             for acc in account_response.to_dict()["accounts"]:
                 sub_account = {
                     'account_id': acc['account_id'],
+                    "current_balance": acc['balances'].get('current', 0),
                     'institution_id': bank_account.institution_id,
                     'name': acc['name'],
                     'official_name': acc.get('official_name', ''),
@@ -201,7 +202,7 @@ class GetAccountView(APIView):
                 
                 sub_accounts.append(sub_account)
 
-            return Response({"data":sub_accounts}, status=status.HTTP_200_OK)
+            return Response(sub_accounts, status=status.HTTP_200_OK)
         
         except BankAccount.DoesNotExist:
             return Response({'detail': 'Bank account not found.'}, status=status.HTTP_404_NOT_FOUND)

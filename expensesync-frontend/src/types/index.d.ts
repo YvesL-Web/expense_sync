@@ -144,11 +144,11 @@ declare interface CreditCardProps {
   showBalance?: boolean;
 }
 
-declare interface BankInfoProps {
-  account: Account;
-  appwriteItemId?: string;
-  type: "full" | "card";
-}
+// declare interface BankInfoProps {
+//   account: Account;
+//   appwriteItemId?: string;
+//   type: "full" | "card";
+// }
 
 declare interface HeaderBoxProps {
   type?: "title" | "greeting";
@@ -199,10 +199,10 @@ declare interface BankDropdownProps {
   otherStyles?: string;
 }
 
-declare interface BankTabItemProps {
-  account: Account;
-  appwriteItemId?: string;
-}
+// declare interface BankTabItemProps {
+//   account: Account;
+//   appwriteItemId?: string;
+// }
 
 declare interface TotalBalanceBoxProps {
   accounts: BankAccount[];
@@ -241,9 +241,9 @@ declare interface CategoryBadgeProps {
   category: string;
 }
 
-declare interface TransactionTableProps {
-  transactions: Transaction[];
-}
+// declare interface TransactionTableProps {
+//   transactions: Transaction[];
+// }
 
 declare interface CategoryProps {
   category: CategoryCount;
@@ -415,28 +415,48 @@ export interface Transaction {
   account_id: string;
   name: string;
   amount: number;
-  date: string;
+  date: Date;
   payment_channel: string;
   pending: boolean;
   category: string;
   image: string;
 }
 
+declare interface TransactionTableProps {
+  transactions: Transaction[];
+}
+
+export interface SubAccount {
+  account_id: string;
+  institution_id: string;
+  current_balance: number;
+  name: string;
+  official_name: string;
+  type: string;
+  subtype: string;
+  transactions: Transaction[];
+}
+
 export interface AcccountDetailsResponse {
-  data: [
-    {
-      account_id: string;
-      institution_id: string;
-      name: string;
-      official_name: string;
-      type: string;
-      subtype: string;
-      transactions: Transaction[];
-    }
-  ];
+  data: SubAccount[];
 }
 
 declare interface RecentTransactionsProps {
   accounts: AcccountDetailsResponse;
   page: number;
+}
+
+declare interface BankTabItemProps {
+  account: BankAccount;
+  account_id: string;
+}
+declare interface SubAccountItemProps {
+  sub_account: SubAccount;
+  sub_account_id: string;
+}
+
+declare interface AccountInfoProps {
+  sub_account: SubAccount;
+  account_id?: string;
+  type: "full" | "card";
 }
