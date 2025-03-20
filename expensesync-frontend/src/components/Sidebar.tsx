@@ -8,9 +8,12 @@ import { usePathname } from "next/navigation";
 // import PlaidLink from './PlaidLink'
 import { SiderbarProps } from "@/types";
 import Footer from "./Footer";
+import PlaidLink from "./PlaidLink";
+import { useAppSelector } from "@/lib/redux/hooks/typedHook";
 
 const Sidebar = ({ user }: SiderbarProps) => {
   const pathname = usePathname();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   
   return (
     <section className="sidebar">
@@ -52,7 +55,7 @@ const Sidebar = ({ user }: SiderbarProps) => {
           );
         })}
 
-        {/* <PlaidLink user={user} /> */}
+        <PlaidLink isAuthenticated={isAuthenticated}/>
       </nav>
 
       <Footer user={user} />

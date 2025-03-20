@@ -177,7 +177,7 @@ declare interface PaginationProps {
 declare interface PlaidLinkProps {
   isAuthenticated: boolean;
   variant?: "primary" | "ghost";
-  dwollaCustomerId?: string;
+  // dwollaCustomerId?: string;
 }
 
 // declare type User = sdk.Models.Document & {

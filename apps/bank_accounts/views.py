@@ -126,9 +126,10 @@ class GetAccountsView(APIView):
                 user=user).only('id', 'access_token', 'institution_id')
 
             accounts = []
-            current_balance = 0
+            
             # Retrieve account details from Plaid
             for bank_account in bank_accounts:
+                current_balance = 0
                 account_request = AccountsGetRequest(
                     access_token=bank_account.access_token)
                 account_response = plaid_config.client.accounts_get(
@@ -211,6 +212,33 @@ class GetAccountView(APIView):
             logger.error(f"Error in GetAccountView for user {request.user}: {str(e)}")
             return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class GetAccountTransactions(APIView):
+    permission_classes= [permissions.IsAuthenticated]
+
+    def get(self, request, account_id=None):
+        if account_id:
+            try:
+                # Récupérer le compte bancaire
+                bank_account = BankAccount.objects.get(id=account_id, user=request.user)
+                # Mettre à jour les transactions dans la base de données
+                transactions_view = GetTransactionsView()
+                transactions_view.fetch_transactions(account_id, request.user)
+
+                # Récupérer les transactions mises à jour depuis la base de données
+                transactions = Transaction.objects.filter(bank=bank_account)
+
+                return Response(TransactionSerializer(transactions, many=True).data, status=status.HTTP_200_OK)
+            except Exception as e :
+                logger.error(f"An error occured -> {str(e)}")
+                return Response({"detail": "No account found"}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            user = request.user
+            user_banksAccount = BankAccount.objects.filter(user=user)
+            return Response(BankAccountSerializer(user_banksAccount, many=True).data, status=status.HTTP_200_OK)
+
+
+
 class GetTransactionsView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -245,7 +273,6 @@ class GetTransactionsView(APIView):
                 access_token=bank.access_token, cursor=cursor or ""
             )
             transaction_response = plaid_config.client.transactions_sync(transaction_request)
-
             added.extend(transaction_response["added"])
             modified.extend(transaction_response["modified"])
             removed.extend(transaction_response["removed"])
@@ -288,6 +315,3 @@ class GetTransactionsView(APIView):
 
         Transaction.objects.filter(transaction_id__in=[t['transaction_id'] for t in removed]).delete()
         SyncCursor.objects.filter(bank=bank).update(cursor=cursor)
-
-
-
